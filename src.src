@@ -1,3 +1,11 @@
 # comment
 
-sym bols
+atoms { # named group
+
+[ sym bols ] # list
+
+{ -01 +002.30 -4e+05 +05.6E-78	# numbers }	# set
+
+'string'
+
+}
