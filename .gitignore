@@ -1,3 +1,5 @@
 *~
 *.swp
 *.log
+neo4j-community-*/
+neoclipse-*/
