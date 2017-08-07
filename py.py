@@ -1,17 +1,45 @@
 import os,sys ; print sys.argv ; print
 
+try: SRC = sys.argv[1]
+except IndexError: SRC = 'src.src'
+
+############ neo4j connector #####
+
+import neo4j.v1 as neo4j
+
+BOLT = 'bolt://localhost:7687'
+USER = 'neo4j'
+PASS = "gjyznjd"
+driver = neo4j.GraphDatabase.driver(BOLT, auth=neo4j.basic_auth(USER, PASS))
+print 'neo4j driver',driver
+session = driver.session()
+print 'neo4j session',session
+print
+
 ########## core objects ##########
 
 class Sym:
     ' symbol '
     tag = 'sym'
-    def __init__(self, V): self.val = V
+    def __init__(self, V):
+        self.val = V
+        self.merge_class()
+        session.run('''%s MERGE (:%s {tag:"%s" , val:"%s"}) -[:isa]-> (class)'''%(
+            self.match_class(),self.tag,self.tag,self.val))
+    def merge_class(self):
+        session.run('MERGE (%s:class {tag:"class",val:"%s"})'%(self.tag,self.tag))
+    def match_class(self):
+        return 'MATCH (class:class) WHERE class.val="%s"' % self.tag
     def __repr__(self): return '<%s:%s>' % (self.tag, self.val)
     
 class Num(Sym):
     ' number '
     tag = 'num'
-    def __init__(self,V): Sym.__init__(self, V) ; self.val = float(V)
+    def __init__(self,V):
+        self.val = float(V)
+        self.merge_class()
+        session.run('''%s MERGE (:%s {tag:"%s" , val:%s}) -[:isa]-> (class)'''%(
+            self.match_class(),self.tag,self.tag,self.val))
     
 class Str(Sym):
     tag = 'str'
@@ -64,4 +92,7 @@ def t_error(t): print 'lexer' ,t # raise BaseException('%s'%t)
 def p_error(p): print 'parser',p # raise BaseException('%s'%p)
 
 lex.lex()
-yacc.yacc(debug=False,write_tables=False).parse(open(sys.argv[1]).read())
+yacc.yacc(debug=False,write_tables=False).parse(open(SRC).read())
+
+session.close()
+driver.close()
