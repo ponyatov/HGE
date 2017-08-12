@@ -1,14 +1,66 @@
 digraph architecture {
+
 subgraph cluster_hosting {
 label = "single hosting server or cloud";
 color="#DDFFFF"; style=filled;
-app [label="application\nserver"];
-neo4j [label="neo4j\ngraph storage server"];
-app -> neo4j [dir=both,label=" BOLT\rprotocol"];
+//node [style=filled;color=white];
+
+	subgraph cluster_app {
+		style=filled; color=white;
+		label="application\nserver";
+		rankdir=TD;
+		GUI_renderer [label="GUI\nrenderer"];
+		TransactionEventHandler;
+};
+
+neo4j -> GUI_renderer [dir=both,label="connection to\nView/Controller\nelements"];
+neo4j [label="neo4j\ngraph storage server",fillcolor=white];
+TransactionEventHandler -> neo4j [dir=both,label=" BOLT\l protocol"];
 }
+
 client [label="client\n(web browser)"];
-client -> app [label=" user-generated\n events"];
-app -> client [label=" html\l representation\rupdates"]; 
+client -> GUI_renderer [label=" user-generated\n events"];
+GUI_renderer -> client [label=" html\l representation\rupdates"]; 
 neo4j -> client [style=dotted,dir=both,label=" neo4j integrated\nweb interface"];
+
+
+subgraph cluster_mobile {label="mobile client\n(Android)"
+offline [label="offline-enabled\nneo4j mirror"];
+native_GUI [label="native\nGUI"];
+native_GUI -> offline [dir=both,label="View/Controller"];
+
+subgraph cluster_api {
+	label="Software API";
+	node[shape=record];
+	api [label="{<lock> Lock Screen|<alarm> Alarm Clock|<cal> Google Calendar|<rtm> Remember The Milk}"];
+//	api:rtm -> api:lock [label="active\ntasks"];
+}
+	offline -> api:rtm [dir=both,label="task\nplanning"];
+	offline -> api:cal [label="long time\nevent planning"];
+	offline -> api:alarm [label="day\nalarms"];
+	offline -> api:lock [label="short plan\ndisplay"];
+
+subgraph cluster_hw {
+    node [shape=record];
+    label = "hardware"
+    hw [label="{<gsm> GSM|<gps> GPS|<bat> battery|<bt> Bluetooth}"];
+    }
+    hw:gsm -> offline [label="network\nstatus"];
+    hw:gps -> offline [label="geopositioning\nupdates"];
+    hw:bat -> offline [label="power\nstatus"];
+hw:bt -> gateway -> offline;
+gateway [label="data format\ngateway"];
+
+};
+neo4j -> offline [dir=both,label=" detachable\r replication"];
+
+hw:bt->lite_gui [dir=both,label="GUI\nevents"];
+hw:bt->headset [label="alarms"];
+
+subgraph cluster_watch {
+label="SmartWatch (Pebble)";
+lite_gui;
+
+}
 
 }
