@@ -21,15 +21,21 @@ print
 class Sym:
     ' symbol '
     tag = 'sym'
-    def __init__(self, V):
+    def __init__(self, V,super=None):
         self.val = V
-        self.merge_class()
+        self.merge_class(super)
         session.run('''%s MERGE (:%s {tag:"%s" , val:"%s"}) -[:isa]-> (class)'''%(
             self.match_class(),self.tag,self.tag,self.val))
-    def merge_class(self):
-        session.run('MERGE (%s:class {tag:"class",val:"%s"})'%(self.tag,self.tag))
-    def match_class(self):
-        return 'MATCH (class:class) WHERE class.val="%s"' % self.tag
+    def merge_class(self, super):
+        if super:
+            session.run('%s MERGE (%s:class {tag:"class",val:"%s"}) -[:ako]-> (class)' % (
+                self.match_class(super),self.tag, self.tag))
+        else:
+            session.run('MERGE (%s:class {tag:"class",val:"%s"})' % (self.tag, self.tag))
+    def match_class(self, super=None):
+        if super: C = super.tag
+        else: C = self.tag
+        return 'MATCH (class:class) WHERE class.val="%s"' % C
     def __repr__(self): return '<%s:%s>' % (self.tag, self.val)
     
 class Num(Sym):
@@ -37,12 +43,13 @@ class Num(Sym):
     tag = 'num'
     def __init__(self,V):
         self.val = float(V)
-        self.merge_class()
+        self.merge_class(Sym)
         session.run('''%s MERGE (:%s {tag:"%s" , val:%s}) -[:isa]-> (class)'''%(
             self.match_class(),self.tag,self.tag,self.val))
     
 class Str(Sym):
     tag = 'str'
+    def __init__(self,V): Sym.__init__(self, V, Sym)
     
 class Op(Sym):
     ' operator '
