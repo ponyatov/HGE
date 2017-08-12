@@ -41,7 +41,7 @@ gz/$(JRE_GZ):
 server: neo
 	JAVA_HOME=$(CWD)/$(JRE) $(CWD)/$(NEO)/bin/neo4j console 
 
-doc: doc/architecture.png
+doc: doc/architecture.png doc/mobile.png
 
 doc/%.svg: doc/%.dot
 	dot -T svg -o $@ $<
