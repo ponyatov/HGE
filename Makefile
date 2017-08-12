@@ -10,6 +10,8 @@ NEO_GZ = $(NEO)-unix.tar.gz
 JRE = jre$(JRE_RELEASE)
 JRE_GZ = jre-$(JRE_VER)-linux-x64.tar.gz
 
+CWD = $(CURDIR)
+
 .PHONY: all neo
 
 all: neo log.log
@@ -35,3 +37,7 @@ gz/$(NEO_GZ):
 #	$(WGET) -O $@ http://dist.neo4j.org/neoclipse/$(NCL)-linux.gtk.x86_64.tar.gz
 gz/$(JRE_GZ):
 	$(WGET) -O $@ --header "Cookie: oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jdk/$(JRE_VER)-b01/090f390dda5b47b9b721c7dfaa008135/$(JRE_GZ)
+	
+.PHONY: server
+server: neo
+	JAVA_HOME=$(CWD)/$(JRE) $(CWD)/$(NEO)/bin/neo4j console 
