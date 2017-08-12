@@ -12,9 +12,9 @@ JRE_GZ = jre-$(JRE_VER)-linux-x64.tar.gz
 
 CWD = $(CURDIR)
 
-.PHONY: all neo
+.PHONY: all neo server doc
 
-all: neo log.log
+all: neo log.log doc
 	JAVA_HOME=$(CURDIR)/$(JRE) env | grep -i java
 
 log.log: src.src py.py
@@ -38,6 +38,12 @@ gz/$(NEO_GZ):
 gz/$(JRE_GZ):
 	$(WGET) -O $@ --header "Cookie: oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jdk/$(JRE_VER)-b01/090f390dda5b47b9b721c7dfaa008135/$(JRE_GZ)
 	
-.PHONY: server
 server: neo
 	JAVA_HOME=$(CWD)/$(JRE) $(CWD)/$(NEO)/bin/neo4j console 
+
+doc: doc/architecture.png
+
+doc/%.svg: doc/%.dot
+	dot -T svg -o $@ $<
+doc/%.png: doc/%.dot
+	dot -T png -o $@ $<
