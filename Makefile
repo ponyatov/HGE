@@ -15,7 +15,7 @@ CWD = $(CURDIR)
 .PHONY: all neo server doc
 
 all: neo log.log doc
-	JAVA_HOME=$(CURDIR)/$(JRE) env | grep -i java
+#	JAVA_HOME=$(CURDIR)/$(JRE) env | grep -i java
 
 log.log: src.src py.py
 	python py.py $< > $@ && tail $(TAIL) $@
